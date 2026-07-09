@@ -1,0 +1,7 @@
+[
+  {"key": "tv",      "name": "TV",           "color": "#5E8EE6", "beta": 320, "gamma": 60, "alpha": 1.5, "theta": 0.65},
+  {"key": "search",  "name": "Paid Search",  "color": "#2FBBA0", "beta": 140, "gamma": 10, "alpha": 1.0, "theta": 0.05},
+  {"key": "social",  "name": "Paid Social",  "color": "#9D8BF2", "beta": 200, "gamma": 30, "alpha": 1.3, "theta": 0.30},
+  {"key": "video",   "name": "Online Video", "color": "#E0925E", "beta": 170, "gamma": 38, "alpha": 1.4, "theta": 0.45},
+  {"key": "display", "name": "Display",      "color": "#58C0DA", "beta": 90,  "gamma": 22, "alpha": 1.1, "theta": 0.20}
+]

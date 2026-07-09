@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMM · Budget Planner</title>
+  <meta name="description" content="Interactive Media Mix Model budget planner — saturation curves, optimal allocation and budget-response scenarios in real time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>
+    /* set theme before first paint to avoid a flash */
+    (function () {
+      try {
+        var t = localStorage.getItem("mmm-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
+
+  <!-- scroll progress -->
+  <div class="scroll-progress" aria-hidden="true"><span id="scrollBar"></span></div>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top" data-scroll="#top">
+        <span class="brand-mark">◆</span>
+        <span class="brand-text">MMM<span class="brand-sub">Budget Planner</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#data" data-scroll="#data">Data</a>
+        <a href="#plan" data-scroll="#plan">Plan</a>
+        <a href="#analytics" data-scroll="#analytics">Analytics</a>
+        <a href="#scenario" data-scroll="#scenario">Scenario</a>
+        <a href="#params" data-scroll="#params">Parameters</a>
+      </nav>
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle light or dark theme" title="Toggle theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="btn ghost sm" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <button class="theme-toggle floating" id="floatingTheme" data-theme-toggle aria-label="Toggle light or dark theme" title="Toggle theme">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+
+  <!-- ===================== LANDING ===================== -->
+  <section id="landing" class="landing">
+    <canvas id="heroCanvas" class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="landing-orb" aria-hidden="true"></div>
+    <div class="hero-spot" id="heroSpot" aria-hidden="true"></div>
+    <div class="landing-inner">
+      <div class="eyebrow"><span class="eyebrow-rule"></span>Bayesian Media Mix Model<span class="eyebrow-rule"></span></div>
+      <h1 class="landing-title">Budget Planner</h1>
+      <p class="landing-tagline">Plan your media budget and <span class="grad">see the response live.</span></p>
+      <p class="landing-desc">
+        An interactive Media Mix Model. Set the weekly spend per channel and read contribution,
+        ROAS, saturation response curves, the optimal allocation and the budget-response scenario —
+        all in real time, entirely in your browser.
+      </p>
+      <div class="landing-cta">
+        <a class="btn primary lg magnetic" href="#top" data-scroll="#top">
+          Open the planner
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        </a>
+        <span class="landing-meta">5 channels · live optimisation · runs client-side</span>
+      </div>
+    </div>
+    <a class="scroll-cue" href="#top" data-scroll="#top" aria-label="Scroll to the planner">
+      <span>Scroll</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </a>
+  </section>
+
+  <main id="top" class="wrap">
+
+    <!-- ===================== KPIs ===================== -->
+    <section class="kgrid reveal">
+      <div class="kpi">
+        <div class="klabel">Predicted revenue</div>
+        <div class="kval" id="kpiRevenue">€0k</div>
+        <div class="ksub">per week · baseline + media</div>
+      </div>
+      <div class="kpi accent">
+        <div class="klabel">Media-driven</div>
+        <div class="kval" id="kpiMedia">€0k</div>
+        <div class="ksub" id="kpiMediaSub">— of revenue</div>
+      </div>
+      <div class="kpi">
+        <div class="klabel">Baseline</div>
+        <div class="kval" id="kpiBaseline">€0k</div>
+        <div class="ksub">organic · no media</div>
+      </div>
+      <div class="kpi green">
+        <div class="klabel">Blended ROAS</div>
+        <div class="kval" id="kpiRoas">0.00×</div>
+        <div class="ksub" id="kpiRoasSub">— total spend</div>
+      </div>
+    </section>
+
+    <!-- ===================== DATA IMPORT ===================== -->
+    <section id="data" class="panel reveal">
+      <div class="panel-head"><h2>Import expenditure data</h2><span class="hint">drag a CSV in to analyse &amp; calibrate</span></div>
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop a CSV file or click to browse">
+        <div class="dz-inner">
+          <svg class="dz-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/></svg>
+          <div class="dz-title">Drop a CSV file here</div>
+          <div class="dz-sub">or <button type="button" class="dz-browse">browse</button> — spend by channel, a snapshot, or transactions</div>
+        </div>
+        <input type="file" id="csvFile" accept=".csv,text/csv" hidden />
+      </div>
+      <div id="csvResult" hidden></div>
+    </section>
+
+    <!-- ===================== ANALYTICS ===================== -->
+    <section id="analytics" class="panel reveal">
+      <div class="panel-head">
+        <h2>Custom analytics</h2>
+        <button class="btn ghost sm" id="libToggle">＋ Add metrics</button>
+      </div>
+
+      <div id="customKpis" class="kgrid custom-grid"></div>
+      <div id="customEmpty" class="empty-hint" hidden>
+        No custom metrics pinned yet. Open the library to add marketing KPIs to your dashboard.
+      </div>
+
+      <div id="kpiLibrary" class="lib" hidden>
+        <div class="lib-head">
+          <span class="lib-title">KPI library</span>
+          <input type="search" id="libSearch" class="lib-search" placeholder="Search metrics…" />
+        </div>
+        <div id="libGrid" class="lib-grid"></div>
+
+        <!-- formula builder -->
+        <div class="builder">
+          <div class="builder-title">＋ Build your own metric</div>
+          <div class="builder-grid">
+            <input id="mName" class="b-in" placeholder="Metric name — e.g. Profit per channel" />
+            <input id="mFormula" class="b-in mono" placeholder="Formula — e.g. media / totSpend" spellcheck="false" />
+            <select id="mUnit" class="b-in">
+              <option value="">Number</option>
+              <option value="€k">€k</option>
+              <option value="%">%</option>
+              <option value="×">×</option>
+            </select>
+            <input id="mDec" class="b-in" type="number" min="0" max="4" placeholder="dec" />
+            <button id="mAdd" class="btn primary sm">Add</button>
+          </div>
+          <div class="builder-foot">
+            <span id="mPreview" class="builder-preview"></span>
+            <button id="mHelp" class="builder-help" type="button">Available variables ▾</button>
+          </div>
+          <div id="mVars" class="builder-vars" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PLAN ===================== -->
+    <section id="plan" class="grid-2 reveal">
+      <!-- controls -->
+      <div class="panel controls">
+        <div class="panel-head"><h2>Controls</h2><span class="hint">drag a slider or a curve point</span></div>
+
+        <label class="field-label" for="baseline">Baseline revenue · €k/week</label>
+        <input class="num" type="number" id="baseline" min="0" max="5000" step="10" />
+
+        <div class="sect">Weekly spend per channel</div>
+        <div id="sliders"></div>
+
+        <div class="sect">Optimise a budget</div>
+        <label class="field-label" for="optBudget">Total weekly budget · €k</label>
+        <input class="num" type="number" id="optBudget" min="0" max="2000" step="5" />
+        <button class="btn primary block" id="optBtn">Optimise allocation →</button>
+        <div class="optbox" id="optResult"></div>
+      </div>
+
+      <!-- curves + table -->
+      <div class="panel">
+        <div class="panel-head"><h2>Saturation response curves</h2><span class="hint">current operating point marked</span></div>
+        <div id="curves" class="curves-grid"></div>
+
+        <div class="sect">Contribution &amp; efficiency</div>
+        <div class="table-scroll">
+          <table class="ctable" id="contribTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SCENARIO ===================== -->
+    <section id="scenario" class="panel reveal">
+      <div class="panel-head"><h2>Scenario · response to total budget</h2><span class="hint">optimally reallocated at each budget</span></div>
+      <div class="charts-stack">
+        <details class="chart-card">
+          <summary>
+            <span class="chart-title">Optimal incremental revenue</span>
+            <span class="chart-sum" id="revSum">—</span>
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="chart-host"><svg id="revChart" class="big-svg"></svg><div class="tip" id="revTip"></div></div>
+        </details>
+        <details class="chart-card">
+          <summary>
+            <span class="chart-title">Marginal € per € · diminishing returns</span>
+            <span class="chart-sum" id="margSum">—</span>
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="chart-host"><svg id="margChart" class="big-svg"></svg><div class="tip" id="margTip"></div></div>
+        </details>
+      </div>
+      <p class="caption" id="scenarioCaption"></p>
+    </section>
+
+    <!-- ===================== PARAMETERS ===================== -->
+    <section id="params" class="panel reveal">
+      <div class="panel-head"><h2>Model parameters</h2><span class="hint">β ceiling · γ half-saturation · α shape · θ carryover</span></div>
+      <div class="param-table">
+        <div class="param-row param-row-head">
+          <div class="param-name">Channel</div>
+          <div class="param-field"><label>β</label></div>
+          <div class="param-field"><label>γ</label></div>
+          <div class="param-field"><label>α</label></div>
+          <div class="param-field"><label>θ</label></div>
+        </div>
+        <div id="paramRows"></div>
+      </div>
+
+      <div class="io-row">
+        <button class="btn ghost" id="uploadBtn">Upload params.json</button>
+        <button class="btn ghost" id="exportBtn">Download params.json</button>
+        <input type="file" id="fileInput" accept="application/json,.json" hidden />
+      </div>
+      <details class="io-paste">
+        <summary>Paste params.json</summary>
+        <textarea id="jsonInput" rows="5" placeholder='[{"key":"tv","name":"TV","beta":320,"gamma":60,"alpha":1.5,"theta":0.65,"spend":50}]'></textarea>
+        <div class="io-row">
+          <button class="btn primary sm" id="applyJsonBtn">Apply</button>
+          <span class="err" id="jsonError"></span>
+        </div>
+      </details>
+    </section>
+
+    <footer class="foot reveal">
+      <p>Planning view assumes spend held constant week over week, so the normalised geometric
+      adstock settles to the spend level and the steady-state contribution is the Hill response of
+      spend. The optimiser and scenario maximise total contribution subject to total spend not
+      exceeding the budget. Built on a Bayesian MMM fitted in PyMC.</p>
+      <p class="foot-credit">Media Mix Model · Budget Planner — client-side edition · <a href="alt.html" style="color:var(--accent)">try the editorial edition ↗</a></p>
+    </footer>
+  </main>
+
+  <div id="dragOverlay" class="drag-overlay" aria-hidden="true">
+    <div class="drag-overlay-inner">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/></svg>
+      <span>Drop CSV to import</span>
+    </div>
+  </div>
+
+  <script src="assets/js/model.js"></script>
+  <script src="assets/js/kpis.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/csv.js"></script>
+  <script src="assets/js/pro.js"></script>
+  <script src="assets/js/luxe.js"></script>
+</body>
+</html>
