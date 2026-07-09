@@ -8,24 +8,10 @@ client-side, so there is no server round-trip and no lag.
 It is the decision layer of the wider MMM project: the notebook fits the model and exports
 `params.json`, and this app consumes that file.
 
-## The fast path (recommended)
-
-This edition is a self-contained static website — no Python, no build step, no install.
-
-- **Just open it:** double-click `index.html`. That's it.
-- **Or serve it** (nicer for sharing on a LAN):
-
-  ```bash
-  python -m http.server 5173
-  # then open http://localhost:5173
-  ```
-
 ### Files
 
 ```
 index.html              the dashboard edition (dark, glassy)
-alt.html                the editorial edition (Nº 02 — paper & ink, Swiss print)
-assets/css/alt.css      editorial design system (standalone)
 assets/css/styles.css   design system
 assets/js/model.js      MMM maths (Hill response, projected-gradient optimiser)
 assets/js/kpis.js       library of marketing KPIs (one entry per metric)
@@ -103,15 +89,6 @@ local optima.
   same maths in Python; it is kept for reference and is not maintained in lockstep — the
   golden test guards the JS side against drift.
 
-## Deploy a free public link
-
-Because it is a static site, host it anywhere:
-
-- **GitHub Pages** — push this folder to a repo and enable Pages on the branch.
-- **Netlify / Vercel / Cloudflare Pages** — drag-and-drop the folder, no config.
-
-You get a permanent public URL you can drop straight into a post.
-
 ## Load your own model
 
 Export `params.json` from the notebook, then in the **Parameters** section upload it, paste
@@ -128,11 +105,3 @@ The planner assumes spend is held constant week over week. Under that assumption
 normalised geometric adstock settles to the spend level itself, so the steady-state
 contribution of a channel is the Hill response of its weekly spend. The optimiser and
 scenario maximise total contribution subject to total spend not exceeding the budget.
-
----
-
-### Legacy Streamlit app
-
-The original Streamlit version is kept as `app.py` (`pip install -r requirements.txt &&
-streamlit run app.py`). The static site above supersedes it and is the recommended way to run
-and deploy the planner.
